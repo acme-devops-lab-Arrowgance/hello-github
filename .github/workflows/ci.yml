@@ -8,36 +8,6 @@ permissions:
 jobs:
   test:
     runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v7
-
-      - uses: actions/setup-python@v7
-        with:
-          python-version: "3.12"
-
-      - name: Install test tool
-        run: python -m pip install pytest
-
-      - name: Run tests
-        run: python -m pytest -q
-
-      - name: Upload test artifact
-        if: always()
-        uses: actions/upload-artifact@v7
-        with:
-          name: test-source
-          path: test_calculator.pyname: Python CI
-
-on: [push, pull_request, workflow_dispatch]
-
-permissions:
-  contents: read
-
-jobs:
-  test:
-    runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v7
 
