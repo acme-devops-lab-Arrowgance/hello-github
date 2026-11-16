@@ -1,26 +1,59 @@
-name: First CI
+name: Python CI
 
-on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
-  workflow_dispatch:
+on: [push, pull_request, workflow_dispatch]
 
 permissions:
   contents: read
 
 jobs:
-  smoke-test:
+  test:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - name: Print context
-        run: |
-          echo "Branch: $GITHUB_REF_NAME"
-          echo "Commit: $GITHUB_SHA"
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
 
-      - name: Verify README
-        run: test -f README.md
+      - name: Install test tool
+        run: python -m pip install pytest
+
+      - name: Run tests
+        run: python -m pytest -q
+
+      - name: Upload test artifact
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: test-source
+          path: test_calculator.pyname: Python CI
+
+on: [push, pull_request, workflow_dispatch]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: Install test tool
+        run: python -m pip install pytest
+
+      - name: Run tests
+        run: python -m pytest -q
+
+      - name: Upload test artifact
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: test-source
+          path: test_calculator.py
