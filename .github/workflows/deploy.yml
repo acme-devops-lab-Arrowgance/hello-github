@@ -1,0 +1,20 @@
+name: Staging gate
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy-demo:
+    runs-on: ubuntu-latest
+    environment: staging
+
+    steps:
+      - name: Safe deployment simulation
+        env:
+          DEMO_TOKEN: ${{ secrets.DEMO_TOKEN }}
+        run: |
+          test -n "$DEMO_TOKEN"
+          echo "Simulated deployment completed"
