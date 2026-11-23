@@ -1,0 +1,61 @@
+name: Sync UAI Badge
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch: # Allows manual runs from the Actions tab
+
+permissions:
+  contents: write # Needed to commit the updated README.md
+
+jobs:
+  sync-badge:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Fetch UAI Custom Property
+        id: get-uai
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          UAI=$(gh api /repos/${{ github.repository }}/properties/values \
+            --jq '.[] | select(.property_name == "UAI") | .value // empty')
+          
+          if [ -z "$UAI" ]; then
+            echo "uai=UNASSIGNED" >> "$GITHUB_OUTPUT"
+            echo "color=lightgrey" >> "$GITHUB_OUTPUT"
+          else
+            echo "uai=$UAI" >> "$GITHUB_OUTPUT"
+            echo "color=blue" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Update README.md Badge
+        run: |
+          UAI="${{ steps.get-uai.outputs.uai }}"
+          COLOR="${{ steps.get-uai.outputs.color }}"
+          BADGE="![UAI](https://shields.io{UAI}-${COLOR})"
+
+          # Replace the line between the comment markers
+          python3 -c '
+          import re, pathlib
+          p = pathlib.Path("README.md")
+          text = p.read_text()
+          new_text = re.sub(
+              r"(<!-- UAI-BADGE-START -->\n).*?(\n<!-- UAI-BADGE-END -->)",
+              rf"\g<1>{"""'"$BADGE"'"""}\g<2>",
+              text,
+              flags=re.DOTALL
+          )
+          p.write_text(new_text)
+          '
+
+      - name: Commit updated README
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add README.md
+          git diff --staged --quiet || git commit -m "docs: sync UAI badge [skip ci]"
+          git push
+
