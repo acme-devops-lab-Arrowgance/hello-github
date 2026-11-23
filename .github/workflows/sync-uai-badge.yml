@@ -35,7 +35,7 @@ jobs:
         run: |
           UAI="${{ steps.get-uai.outputs.uai }}"
           COLOR="${{ steps.get-uai.outputs.color }}"
-          BADGE="![UAI](https://shields.io{UAI}-${COLOR})"
+          BADGE="![UAI](https://img.shields.io/badge/UAI-${UAI}-${COLOR})"
 
           # Replace the line between the comment markers
           python3 -c '
@@ -51,11 +51,22 @@ jobs:
           p.write_text(new_text)
           '
 
-      - name: Commit updated README
+      - name: Commit updated README to a branch
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add README.md
-          git diff --staged --quiet || git commit -m "docs: sync UAI badge [skip ci]"
-          git push
 
+          git add README.md
+
+          if git diff --staged --quiet; then
+            echo "README badge is already up to date."
+            exit 0
+          fi
+
+          BRANCH="automation/uai-badge-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+
+          git switch -c "$BRANCH"
+          git commit -m "docs: sync UAI badge"
+          git push origin "HEAD:refs/heads/$BRANCH"
+
+          echo "Open a pull request from $BRANCH into main."
