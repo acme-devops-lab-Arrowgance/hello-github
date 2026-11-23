@@ -1,5 +1,5 @@
 <!-- UAI-BADGE-START -->
-![UAI](https://shields.io)
+![UAI](https://img.shields.io/badge/UAI-UAI2345678920-blue)
 <!-- UAI-BADGE-END -->
 # Hello GitHub
 Learning Git and Actions
