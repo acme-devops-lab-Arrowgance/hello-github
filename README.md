@@ -1,4 +1,6 @@
+<!-- UAI-BADGE-START -->
 ![UAI](https://shields.io)
+<!-- UAI-BADGE-END -->
 # Hello GitHub
 Learning Git and Actions
 Testing branch protection
